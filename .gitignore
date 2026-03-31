@@ -1,0 +1,23 @@
+# Сборка
+build/
+build-linux/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+
+# Объектники / логи
+*.o
+*.a
+*.so
+*.exe
+*.out
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+
+# Временное
+*.swp
+*~
