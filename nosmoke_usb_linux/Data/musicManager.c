@@ -30,7 +30,13 @@ void initMusicFormat()
 }
 
 void LoadMusic(BGM *bgm)
-{	
+{
+	if (!bgm || !bgm->fileName)
+	{
+		return;
+	}
+
+	bgm->wav = NULL;
 	bgm->ret = audsrv_init();
 	
 	char temp[4096];
@@ -82,6 +88,10 @@ void LoadMusic(BGM *bgm)
 	
 void PlayMusic(BGM *bgm)
 {
+	if (!bgm || !bgm->wav)
+	{
+		return;
+	}
 	bgm->ret = fread(bgm->chunk, 1, sizeof(bgm->chunk), bgm->wav);
 
 	if(LoopingPart == 0 && feof(bgm->wav))
@@ -120,7 +130,15 @@ void PlayMusic(BGM *bgm)
 
 void UnloadMusic(BGM *bgm)
 {
-	fclose(bgm->wav);
+	if (!bgm)
+	{
+		return;
+	}
+	if (bgm->wav)
+	{
+		fclose(bgm->wav);
+		bgm->wav = NULL;
+	}
 
 	printf("sample: stopping audsrv\n");
 	//audsrv_quit();

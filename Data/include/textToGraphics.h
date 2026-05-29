@@ -25,7 +25,9 @@ typedef struct
 
 Font setUpFontStruct(int x, int y, int width, int height);
 
-void SetUpFont();
+void SetUpFont(void);
+void SetUpFontIfNeeded(void);
+int FontsAreLoaded(void);
 
 void DrawText(int xpos, int ypos, char* Text, int scale, u64 colour, int selected);
 

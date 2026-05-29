@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")"
+BIN=""
 if [[ -f build/nosmoke ]]; then
-  exec ./build/nosmoke
+  BIN=build/nosmoke
 elif [[ -f nosmoke_linux ]]; then
-  chmod +x nosmoke_linux 2>/dev/null || true
-  exec ./nosmoke_linux
-else
+  BIN=nosmoke_linux
+fi
+if [[ -z "$BIN" ]]; then
   echo "Нет бинарника. Сначала: chmod +x build.sh && ./build.sh"
   exit 1
 fi
+if ! strings "$BIN" | grep -q "BUILD_ID=20260529-gamefix"; then
+  echo "ОШИБКА: $BIN — СТАРАЯ сборка (будет вылет на «Новая игра»)."
+  echo "Выполните: ./build.sh"
+  exit 1
+fi
+exec ./"$BIN"

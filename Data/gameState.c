@@ -80,7 +80,7 @@ static void GameLoadOpeningScene(void)
 		fprintf(stderr, "[nosmoke] нет файла: %s\n", game_path_a);
 	}
 
-	SetUpFont();
+	SetUpFontIfNeeded();
 	VNTextName = "RNJ NJ";
 	VNText = "RV RV[";
 }
@@ -88,19 +88,26 @@ static void GameLoadOpeningScene(void)
 void GameStart()
 {
 	fprintf(stderr, "[nosmoke] GameStart (cwd=%s)\n", relativePath);
+	fflush(stderr);
 
 	strcpy(game_music_path, relativePath);
 	strcat(game_music_path, PickMusic(1));
 	MikuSong.fileName = game_music_path;
+	MikuSong.wav = NULL;
 	LoadMusic(&MikuSong);
 
 	VNTextName = "";
 	VNText = "";
+
+	fprintf(stderr, "[nosmoke] GameStart: loading scene...\n");
+	fflush(stderr);
 	GameLoadOpeningScene();
+
 	VNSTEP = 1;
 	game_input_grace_frames = 3;
 
 	fprintf(stderr, "[nosmoke] GameStart OK (bg %dx%d)\n", GameBG.Width, GameBG.Height);
+	fflush(stderr);
 }
 
 void GameUpdate()
@@ -203,7 +210,7 @@ void GameUpdate()
 			strcat(game_path_a, GIRLBGIMAGE);
 			TextureLoadPng(&GameBG, game_path_a);
 			
-			SetUpFont();
+			SetUpFontIfNeeded();
 			VNSTEP++;
 			break;
 			
@@ -388,7 +395,7 @@ void GameUpdate()
 			strcat(game_path_a, HALLWAY1);
 			TextureLoadPng(&GameBG,game_path_a);
 			
-			SetUpFont();
+			SetUpFontIfNeeded();
 			VNSTEP++;
 			
 			VNTextName = "";
@@ -699,7 +706,7 @@ void GameUpdate()
 			strcat(game_path_a, HALLWAY2);
 			TextureLoadPng( &GameBG,game_path_a);
 			
-			SetUpFont();
+			SetUpFontIfNeeded();
 			VNSTEP++;
 			
 			VNTextName = "";
@@ -869,7 +876,7 @@ void GameUpdate()
 			strcat(game_path_a, HALL3);
 			TextureLoadPng( &GameBG,game_path_a);
 			
-			SetUpFont();
+			SetUpFontIfNeeded();
 			VNSTEP++;
 			
 			VNTextName = "";

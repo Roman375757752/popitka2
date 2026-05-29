@@ -43,6 +43,19 @@ Font setUpFontStruct(int x, int y, int width, int height)
 }
 
 
+int FontsAreLoaded(void)
+{
+	return fontRussian.impl != NULL;
+}
+
+void SetUpFontIfNeeded(void)
+{
+	if (!FontsAreLoaded())
+	{
+		SetUpFont();
+	}
+}
+
 void SetUpFont()
 {
 

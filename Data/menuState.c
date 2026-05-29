@@ -20,6 +20,10 @@
 #include "include/pad.h"
 #include "include/renderCompat.h"
 
+#include <stdio.h>
+#include <string.h>
+
+static char menu_music_path[4096];
 
 /****** User External Files ********/
 #include "extern/menuState.ext"
@@ -43,20 +47,20 @@ void MenuStart()
 	idleTimer = 0; // Once the Idle timer reaches 6000 then restart the screen to prevent screen burn on CRT
 	initMusicFormat();
 	
-	char temp[4096];
-	strcpy(temp, relativePath);
-	strcat(temp, PickMusic(1));
-	MenuMusicy.fileName = temp;
-	
+	strncpy(menu_music_path, relativePath, sizeof(menu_music_path) - 1);
+	menu_music_path[sizeof(menu_music_path) - 1] = '\0';
+	strncat(menu_music_path, PickMusic(1), sizeof(menu_music_path) - strlen(menu_music_path) - 1);
+	MenuMusicy.fileName = menu_music_path;
+	MenuMusicy.wav = NULL;
+
 	LoadMusic(&MenuMusicy);
 
 	char tempy[4096];
 	strcpy(tempy, relativePath);
 	strcat(tempy, TITLEIMAGEPATH);
 	TextureLoadPng(&TitleImage,tempy);
-	
-	
-	SetUpFont();
+
+	SetUpFontIfNeeded();
 	
 	selectedOption = 0;
 }
@@ -167,10 +171,12 @@ void MenuDraw( u64 colour)
 
 void MenuEnd()
 {
-	printf("This should Run when MenuState is Gone.\n");
-	// Clear VRAM after the Menu is done~
+	fprintf(stderr, "[nosmoke] MenuEnd\n");
+	fflush(stderr);
 	VramClear();
 	UnloadMusic(&MenuMusicy);
+	fprintf(stderr, "[nosmoke] MenuEnd done\n");
+	fflush(stderr);
 }
 
 StateManager MenuState =

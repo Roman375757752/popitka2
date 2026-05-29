@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
 	(void)argc;
 
 	setvbuf(stderr, NULL, _IONBF, 0);
-	fprintf(stderr, "[nosmoke] сборка 2026-05-29 (исправление новой игры)\n");
+	fprintf(stderr, "[nosmoke] BUILD_ID=20260529-gamefix\n");
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER) != 0)
 	{
