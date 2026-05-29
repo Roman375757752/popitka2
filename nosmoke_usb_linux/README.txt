@@ -45,3 +45,4 @@ sudo apt install -y build-essential cmake pkg-config libsdl2-dev libsdl2-image-d
   Enter, Пробел или X — подтвердить
   Esc — назад / выход из меню
 Поддерживается геймпад (D-Pad, стик, кнопка A / Start).
+В самой игре (визуальная новелла): X / Z / Enter / Space — следующая реплика.

@@ -143,6 +143,7 @@ int main(int argc, char* argv[])
 
 		UpdatePad();
 		StateMachineUpdate(&GameMachineState);
+		ClearScreen(black);
 		StateMachineDraw(&GameMachineState, texCol);
 		SDL_RenderPresent(renderer);
 	}

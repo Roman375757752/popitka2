@@ -107,6 +107,10 @@ void SetUpFont()
 
 void DrawText(int xpos, int ypos, char* Text, int scale, u64 colour, int selected)
 {
+	if (Text == NULL)
+	{
+		return;
+	}
 	for(int i = 0; i < strlen(Text); i++)
 	{
 		int ascii = Text[i];

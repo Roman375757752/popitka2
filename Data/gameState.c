@@ -41,18 +41,19 @@ int VNSTEP;
 char* VNTextName;
 char* VNText;
 
+static char game_music_path[4096];
 
 void GameStart()
 {
-	char temp[4096];
-	strcpy(temp, relativePath);
-	strcat(temp, PickMusic(1));
-	MikuSong.fileName = temp;
-	
+	strcpy(game_music_path, relativePath);
+	strcat(game_music_path, PickMusic(1));
+	MikuSong.fileName = game_music_path;
+
 	LoadMusic(&MikuSong);
 
 	VNSTEP = 0;
-
+	VNTextName = "";
+	VNText = "";
 }
 
 void GameUpdate()
@@ -70,8 +71,7 @@ void GameUpdate()
 		strcpy(tempy4, relativePath);
 		
 		
-			// Change Menu
-		if(PlaystationGamePad.BUTTON_X_KEY_TAP)
+		if (PlaystationGamePad.BUTTON_X_KEY_TAP && VNSTEP > 0)
 		{
 			VNSTEP++;
 		}
@@ -92,12 +92,12 @@ void GameUpdate()
 			TextureLoadPng(&GameBG,tempy);
 			
 			SetUpFont();
-			VNSTEP++;
-			break;
-			
-			case 1:
 			VNTextName = "RNJ NJ";
 			VNText = "RV RV[";
+			VNSTEP++;
+			break;
+
+			case 1:
 			break;
 			
 			case 2:
