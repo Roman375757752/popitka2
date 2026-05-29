@@ -66,7 +66,6 @@ void MenuUpdate()
 	// This part here plays the music
 	PlayMusic(&MenuMusicy);
 	idleTimer++; // Once the Idle timer reaches 6000 then restart the screen to prevent screen burn on CRT
-	printf("%d IdleTimer\n", idleTimer);
 	// This is to prevent the screen burn. We force the game to reset
 	if(idleTimer > 12000)
 	{
@@ -84,7 +83,7 @@ void MenuUpdate()
     	selectedOption++;
     }
 
-	if(PlaystationGamePad.START_KEY_TAP)
+	if(PlaystationGamePad.START_KEY_TAP || PlaystationGamePad.BUTTON_X_KEY_TAP)
     	{	
 		switch(selectedOption)
 		{

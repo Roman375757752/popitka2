@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 {
 	(void)argc;
 
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER) != 0)
 	{
 		fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
 		return 1;
@@ -104,6 +104,8 @@ int main(int argc, char* argv[])
 	}
 
 	RenderBackendInit(renderer);
+	SDL_RaiseWindow(window);
+	SDL_SetWindowInputFocus(window);
 
 	/* Ресурсы ищем от текущей рабочей папки (откуда запустили в терминале), не от каталога exe. */
 #ifdef _WIN32

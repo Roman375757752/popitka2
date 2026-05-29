@@ -14,6 +14,7 @@
 */
 
 #include "include/pad.h"
+#include <string.h>
 
 /*
  * Global var's
@@ -223,12 +224,16 @@ void PadInitialize()
     {
         printf("pad initalization failed!\n");
         SleepThread();
-    }  
+    }
+
+    memset(&PlaystationGamePad, 0, sizeof(PlaystationGamePad));
 }
 
 
 void UpdatePad()
 {
+	memset(&PlaystationGamePad, 0, sizeof(PlaystationGamePad));
+
 	i=0;
         ret=padGetState(port, slot);
         while((ret != PAD_STATE_STABLE) && (ret != PAD_STATE_FINDCTP1)) 

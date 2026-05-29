@@ -64,7 +64,7 @@ struct Arbiter* findArbiter(struct ArbiterKey key)
            return &g_arbiters[i];
     }
 
-    return NULL;
+    return null;
 }
 
 // Insert a new Arbiter into the list which is a simple array
@@ -93,7 +93,7 @@ void eraseArbiter(struct ArbiterKey key)
             for (int j=i; j < g_numArbiters-1; j++)
             {
                 g_arbiterKeys[j]=g_arbiterKeys[j+1];
-                g_arbiters[j]=g_arbiters[j+1];
+                g_arbiters[j]=g_arbiters[j + 1 ];
             }
             g_numArbiters--;
         }
