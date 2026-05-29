@@ -88,6 +88,10 @@ void DrawSpriteTexture(GSTEXTURE* texture,
 	dst.y = y1;
 	dst.w = x2 - x1;
 	dst.h = y2 - y1;
+	if (dst.w <= 0 || dst.h <= 0)
+	{
+		return;
+	}
 
 	{
 		uint8_t r = (uint8_t)(colour & 0xFFu);

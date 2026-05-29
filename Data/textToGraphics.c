@@ -111,11 +111,24 @@ void DrawText(int xpos, int ypos, char* Text, int scale, u64 colour, int selecte
 	{
 		return;
 	}
-	for(int i = 0; i < strlen(Text); i++)
+	for (int i = 0; i < (int)strlen(Text); i++)
 	{
-		int ascii = Text[i];
-		
-		if(ascii != 32)
+		const unsigned char ch = (unsigned char)Text[i];
+		const int ascii = (int)ch;
+
+		if (ascii == 32)
+		{
+			continue;
+		}
+		if (ascii < 0 || ascii >= 128 || fontRUS[ascii].width <= 0 || fontRUS[ascii].height <= 0)
+		{
+			continue;
+		}
+		if (!fontRussian.impl || (selected == 1 && !fontRussianGold.impl))
+		{
+			continue;
+		}
+
 		{
 			if(selected == 0)
 			{
@@ -156,10 +169,6 @@ void DrawText(int xpos, int ypos, char* Text, int scale, u64 colour, int selecte
 						2,
 						fontColour);
 			}
-		}
-		else
-		{
-			// ???
 		}
 	}
 }

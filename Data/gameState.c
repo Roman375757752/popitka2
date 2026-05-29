@@ -19,6 +19,8 @@
 #include "include/textToGraphics.h"
 #include "include/renderCompat.h"
 
+#include <stdio.h>
+#include <string.h>
 
 extern StateMachine GameMachineState;
 
@@ -42,59 +44,90 @@ char* VNTextName;
 char* VNText;
 
 static char game_music_path[4096];
+static char game_path_a[4096];
+static char game_path_b[4096];
+static char game_path_c[4096];
+static char game_path_d[4096];
+static int game_input_grace_frames;
+
+static void game_join_path(char* out, size_t outsz, const char* suffix)
+{
+	strncpy(out, relativePath, outsz - 1);
+	out[outsz - 1] = '\0';
+	strncat(out, suffix, outsz - strlen(out) - 1);
+}
+
+static void GameLoadOpeningScene(void)
+{
+	game_join_path(game_path_c, sizeof(game_path_c), NON);
+	TextureLoadPng(&CharacterLeft, game_path_c);
+	if (!CharacterLeft.impl)
+	{
+		fprintf(stderr, "[nosmoke] нет файла: %s\n", game_path_c);
+	}
+
+	game_join_path(game_path_b, sizeof(game_path_b), TEXTBC);
+	TextureLoadPng(&TextBG, game_path_b);
+	if (!TextBG.impl)
+	{
+		fprintf(stderr, "[nosmoke] нет файла: %s\n", game_path_b);
+	}
+
+	game_join_path(game_path_a, sizeof(game_path_a), GIRLBGIMAGE);
+	TextureLoadPng(&GameBG, game_path_a);
+	if (!GameBG.impl)
+	{
+		fprintf(stderr, "[nosmoke] нет файла: %s\n", game_path_a);
+	}
+
+	SetUpFont();
+	VNTextName = "RNJ NJ";
+	VNText = "RV RV[";
+}
 
 void GameStart()
 {
+	fprintf(stderr, "[nosmoke] GameStart (cwd=%s)\n", relativePath);
+
 	strcpy(game_music_path, relativePath);
 	strcat(game_music_path, PickMusic(1));
 	MikuSong.fileName = game_music_path;
-
 	LoadMusic(&MikuSong);
 
-	VNSTEP = 0;
 	VNTextName = "";
 	VNText = "";
+	GameLoadOpeningScene();
+	VNSTEP = 1;
+	game_input_grace_frames = 3;
+
+	fprintf(stderr, "[nosmoke] GameStart OK (bg %dx%d)\n", GameBG.Width, GameBG.Height);
 }
 
 void GameUpdate()
 {
-	// This part here plays the music
-		PlayMusic(&MikuSong);
-		
-		char tempy[4096];
-		strcpy(tempy, relativePath);
-		char tempy2[4096];
-		strcpy(tempy2, relativePath);
-		char tempy3[4096];
-		strcpy(tempy3, relativePath);
-		char tempy4[4096];
-		strcpy(tempy4, relativePath);
-		
-		
-		if (PlaystationGamePad.BUTTON_X_KEY_TAP && VNSTEP > 0)
-		{
-			VNSTEP++;
-		}
-		
-		
-		switch(VNSTEP)
-		{
+	PlayMusic(&MikuSong);
+
+	strcpy(game_path_a, relativePath);
+	strcpy(game_path_b, relativePath);
+	strcpy(game_path_c, relativePath);
+	strcpy(game_path_d, relativePath);
+
+	if (game_input_grace_frames > 0)
+	{
+		game_input_grace_frames--;
+	}
+	else if (VNSTEP > 0
+	         && (PlaystationGamePad.BUTTON_X_KEY_TAP || PlaystationGamePad.START_KEY_TAP
+	             || PlaystationGamePad.BUTTON_O_KEY_TAP))
+	{
+		VNSTEP++;
+	}
+
+	switch (VNSTEP)
+	{
 			case 0:
-			VramClear();
-			
-			strcat(tempy3, NON);
-			TextureLoadPng(&CharacterLeft,tempy3);
-			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
-			
-			strcat(tempy, GIRLBGIMAGE);
-			TextureLoadPng(&GameBG,tempy);
-			
-			SetUpFont();
-			VNTextName = "RNJ NJ";
-			VNText = "RV RV[";
-			VNSTEP++;
+			GameLoadOpeningScene();
+			VNSTEP = 1;
 			break;
 
 			case 1:
@@ -113,11 +146,11 @@ void GameUpdate()
 			case 4: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, KING);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, KING);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "RJHJKM";
 			VNText = "PHFDCNDEQNT LHEPMZ!";
@@ -142,11 +175,11 @@ void GameUpdate()
 			case 9: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			break;
 			
 			case 10:
@@ -161,14 +194,14 @@ void GameUpdate()
 			case 12:
 			VramClear();
 			
-			strcat(tempy3, NON);
-			TextureLoadPng(&CharacterLeft,tempy3);
-			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
-			
-			strcat(tempy, GIRLBGIMAGE);
-			TextureLoadPng(&GameBG,tempy);
+			strcat(game_path_c, NON);
+			TextureLoadPng(&CharacterLeft, game_path_c);
+
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG, game_path_b);
+
+			strcat(game_path_a, GIRLBGIMAGE);
+			TextureLoadPng(&GameBG, game_path_a);
 			
 			SetUpFont();
 			VNSTEP++;
@@ -182,11 +215,11 @@ void GameUpdate()
 			case 14: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, LADYGRAY);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, LADYGRAY);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "KTLB UHTQ";
 			VNText = "J UJCGJLB JY NFRJQ RHFCFDXBR";
@@ -195,11 +228,11 @@ void GameUpdate()
 			case 15: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, LADYGREEN);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, LADYGREEN);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "KTLB GEHGEH";
 			VNText = "KTLB UHTQ[ DFIT GJDTLTYBT JNCNJQ";
@@ -208,11 +241,11 @@ void GameUpdate()
 			case 16: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, LADYGRAY);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, LADYGRAY);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "KTLB UHTQ";
 			VNText = "YJ DTLM GHFDLF";
@@ -221,11 +254,11 @@ void GameUpdate()
 			case 17: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, MAN);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, MAN);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "UHFA HTL";
 			VNText = "LFVS ECGJRJQNTCM";
@@ -234,11 +267,11 @@ void GameUpdate()
 			case 18: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "GHBYW";
 			VNText = "JNTW[[[";
@@ -251,11 +284,11 @@ void GameUpdate()
 			case 20: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, KING);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, KING);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "RJHJKM";
 			VNText = "LF";
@@ -280,11 +313,11 @@ void GameUpdate()
 			case 25: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, NON);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, NON);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "";
 			VNText = "PFK D IJRT";
@@ -293,11 +326,11 @@ void GameUpdate()
 			case 26: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			VNTextName = "GHBYW";
 			VNText = "";
 			break;
@@ -314,11 +347,11 @@ void GameUpdate()
 			case 29: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, KING);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, KING);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "RJHJKM";
 			VNText = "CSYJR";
@@ -331,11 +364,11 @@ void GameUpdate()
 			case 31: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, NON);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, NON);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "";
 			VNText = "DCT EIKB GJ RJVYFNFV";
@@ -346,14 +379,14 @@ void GameUpdate()
 			case 32:
 			VramClear();
 			
-			strcat(tempy3, NON);
-			TextureLoadPng(&CharacterLeft,tempy3);
+			strcat(game_path_c, NON);
+			TextureLoadPng(&CharacterLeft,game_path_c);
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy, HALLWAY1);
-			TextureLoadPng(&GameBG,tempy);
+			strcat(game_path_a, HALLWAY1);
+			TextureLoadPng(&GameBG,game_path_a);
 			
 			SetUpFont();
 			VNSTEP++;
@@ -365,11 +398,11 @@ void GameUpdate()
 			case 33: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			break;
 			
 			case 34:
@@ -392,11 +425,11 @@ void GameUpdate()
 			case 38:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, NON);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, NON);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "";
 			VNText = "NER NER";
@@ -405,11 +438,11 @@ void GameUpdate()
 			case 39: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCESS);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCESS);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "GHBYWTCCF";
 			VNText = "RNJ NFV";
@@ -422,11 +455,11 @@ void GameUpdate()
 			case 41: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			VNTextName = "GHBYW";
 			VNText = "";
 			break;
@@ -439,11 +472,11 @@ void GameUpdate()
 			case 43: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCESS);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCESS);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "GHBYWTCCF";
 			VNText = "XTV Z VJUE DFV GJVJXM";
@@ -452,11 +485,11 @@ void GameUpdate()
 			case 44: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			VNTextName = "GHBYW";
 			VNText = "";
 			break;
@@ -473,11 +506,11 @@ void GameUpdate()
 			case 47: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(&TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(&TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCESS);
-			TextureLoadPng(&CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCESS);
+			TextureLoadPng(&CharacterLeft,game_path_d);
 			
 			VNTextName = "GHBYWTCCF";
 			VNText = "GTXFKMYFZ YJDJCNM";
@@ -502,11 +535,11 @@ void GameUpdate()
 			case 51: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			VNTextName = "GHBYW";
 			VNText = "GHBYWTCCF[[[ UJDJHB VYT[[[";
 			break;
@@ -514,11 +547,11 @@ void GameUpdate()
 			case 52: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCESS);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCESS);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "GHBYWTCCF";
 			VNText = "Z DBLTKF XTKJDTRF D VFCRT";
@@ -531,11 +564,11 @@ void GameUpdate()
 			case 54: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			VNTextName = "GHBYW";
 			VNText = "JQ JQ";
 			break;
@@ -555,11 +588,11 @@ void GameUpdate()
 			case 58: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCESS);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCESS);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "GHBYWTCCF";
 			VNText = "CGJRB YJRB GHBYW";
@@ -568,11 +601,11 @@ void GameUpdate()
 			case 59: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			VNTextName = "GHBYW";
 			VNText = "[[[";
 			break;
@@ -588,11 +621,11 @@ void GameUpdate()
 			case 62:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, NON);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, NON);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "";
 			VNText = "NER NER";
@@ -601,11 +634,11 @@ void GameUpdate()
 			case 63:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, LADYBLOND);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, LADYBLOND);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "KTLB DFQN";
 			VNText = "GHBYW[[[";
@@ -614,11 +647,11 @@ void GameUpdate()
 			case 64: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			VNTextName = "GHBYW";
 			VNText = "KTLB DFQN";
 			break;
@@ -626,11 +659,11 @@ void GameUpdate()
 			case 65:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, LADYBLOND);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, LADYBLOND);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "KTLB DFQN";
 			VNText = "CHFPE UJDJHBNM XNJ Z YBXTUJ YT DBLTKF";
@@ -639,11 +672,11 @@ void GameUpdate()
 			case 66: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			VNTextName = "GHBYW";
 			VNText = "KFLYJ GJRF[[[";
 			break;
@@ -657,14 +690,14 @@ void GameUpdate()
 			case 68: 
 			VramClear();
 			
-			strcat(tempy3, NON);
-			TextureLoadPng( &CharacterLeft,tempy3);
+			strcat(game_path_c, NON);
+			TextureLoadPng( &CharacterLeft,game_path_c);
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy, HALLWAY2);
-			TextureLoadPng( &GameBG,tempy);
+			strcat(game_path_a, HALLWAY2);
+			TextureLoadPng( &GameBG,game_path_a);
 			
 			SetUpFont();
 			VNSTEP++;
@@ -676,11 +709,11 @@ void GameUpdate()
 			case 69: 
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			VNTextName = "GHBYW";
 			VNText = "XNJ I[[[";
 			break;
@@ -688,11 +721,11 @@ void GameUpdate()
 			case 70:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, NON);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, NON);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "";
 			VNText = "NER NER";
@@ -705,11 +738,11 @@ void GameUpdate()
 			case 72:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "GHBYW";
 			VNText = "KFLYJ[[[";
@@ -722,11 +755,11 @@ void GameUpdate()
 			case 74:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, CLOWN);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, CLOWN);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "IEN";
 			VNText = "PLHFDCNDEQNT GHBYW";
@@ -735,11 +768,11 @@ void GameUpdate()
 			case 75:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "GHBYW";
 			VNText = "GHBDTN IEN";
@@ -748,11 +781,11 @@ void GameUpdate()
 			case 76:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, CLOWN);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, CLOWN);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "IEN";
 			VNText = "GJXTVE DS NFRJQ UHECNYSQ";
@@ -761,11 +794,11 @@ void GameUpdate()
 			case 77:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "GHBYW";
 			VNText = "E VTYZ ERHFKB RJHJYE";
@@ -774,11 +807,11 @@ void GameUpdate()
 			case 78:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, CLOWN);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, CLOWN);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "IEN";
 			VNText = "YFYFYFYFYFYYFYFYF";
@@ -795,11 +828,11 @@ void GameUpdate()
 			case 81:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "GHBYW";
 			VNText = "[[[";
@@ -812,11 +845,11 @@ void GameUpdate()
 			case 83:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, KING);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, KING);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "RJHJKM";
 			VNText = "JQ[[[";
@@ -827,14 +860,14 @@ void GameUpdate()
 			case 84: 
 			VramClear();
 			
-			strcat(tempy3, NON);
-			TextureLoadPng( &CharacterLeft,tempy3);
+			strcat(game_path_c, NON);
+			TextureLoadPng( &CharacterLeft,game_path_c);
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy, HALL3);
-			TextureLoadPng( &GameBG,tempy);
+			strcat(game_path_a, HALL3);
+			TextureLoadPng( &GameBG,game_path_a);
 			
 			SetUpFont();
 			VNSTEP++;
@@ -846,11 +879,11 @@ void GameUpdate()
 			case 85:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, KING);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, KING);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "RJHJKM";
 			VNText = "BPDBYBNT VTYZ[[[";
@@ -859,11 +892,11 @@ void GameUpdate()
 			case 86:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, NON);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, NON);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "DCT";
 			VNText = "GHJOFTV";
@@ -872,11 +905,11 @@ void GameUpdate()
 			case 87:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, KING);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, KING);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "RJHJKM";
 			VNText = "GHBYW NTGTHM RJHJKM";
@@ -885,11 +918,11 @@ void GameUpdate()
 			case 88:
 			VramClear();
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng( &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng( &TextBG,game_path_b);
 			
-			strcat(tempy4, PRINCE);
-			TextureLoadPng( &CharacterLeft,tempy4);
+			strcat(game_path_d, PRINCE);
+			TextureLoadPng( &CharacterLeft,game_path_d);
 			
 			VNTextName = "GHBYW";
 			VNText = "Z RJHJKM";
@@ -899,11 +932,11 @@ void GameUpdate()
 			case 86:
 			VramClear(gsGlobal);
 			
-			strcat(tempy2, TEXTBC);
-			TextureLoadPng(gsGlobal, &TextBG,tempy2);
+			strcat(game_path_b, TEXTBC);
+			TextureLoadPng(gsGlobal, &TextBG,game_path_b);
 			
-			strcat(tempy4, NON);
-			TextureLoadPng(gsGlobal, &CharacterLeft,tempy4);
+			strcat(game_path_d, NON);
+			TextureLoadPng(gsGlobal, &CharacterLeft,game_path_d);
 			
 			VNTextName = "";
 			VNText = "RJYTW";
@@ -911,8 +944,8 @@ void GameUpdate()
 			
 			//case 8:
 			//VramClear(gsGlobal);
-			//strcat(tempy, HALL2);
-			//TextureLoadPng(gsGlobal, &GameBG,tempy);
+			//strcat(game_path_a, HALL2);
+			//TextureLoadPng(gsGlobal, &GameBG,game_path_a);
 			//SetUpFont(gsGlobal);
 			//VNSTEP++;
 			//break;
@@ -923,8 +956,8 @@ void GameUpdate()
 			
 			//case 9:
 			//VramClear(gsGlobal);
-			//strcat(tempy, HALL3);
-			//TextureLoadPng(gsGlobal, &GameBG,tempy);
+			//strcat(game_path_a, HALL3);
+			//TextureLoadPng(gsGlobal, &GameBG,game_path_a);
 			//SetUpFont(gsGlobal);
 			//VNSTEP++;
 			//break;
@@ -935,8 +968,8 @@ void GameUpdate()
 			
 			//case 11:
 			//VramClear(gsGlobal);
-			//strcat(tempy, HALLWAY1);
-			//TextureLoadPng(gsGlobal, &GameBG,tempy);
+			//strcat(game_path_a, HALLWAY1);
+			//TextureLoadPng(gsGlobal, &GameBG,game_path_a);
 			//SetUpFont(gsGlobal);
 			//VNSTEP++;
 			//break;
@@ -946,8 +979,8 @@ void GameUpdate()
 			
 			//case 13:
 			//VramClear(gsGlobal);
-			//strcat(tempy, HALLWAY2);
-			//TextureLoadPng(gsGlobal, &GameBG,tempy);
+			//strcat(game_path_a, HALLWAY2);
+			//TextureLoadPng(gsGlobal, &GameBG,game_path_a);
 			//SetUpFont(gsGlobal);
 			//VNSTEP++;
 			//break;*/
@@ -958,6 +991,12 @@ void GameUpdate()
 
 void GameDraw( u64 colour)
 {
+	if (!GameBG.impl && !TextBG.impl)
+	{
+		fprintf(stderr, "[nosmoke] нет графики — запускайте из папки с Graphics/\n");
+		return;
+	}
+
 	DrawSpriteTexture( &GameBG,0,  // X1
 						0,  // Y2
 						0.0f,  // U1
