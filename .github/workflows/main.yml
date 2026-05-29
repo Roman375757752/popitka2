@@ -23,7 +23,8 @@ jobs:
       - name: Configure and build
         run: |
           cmake -S . -B build
-          cmake --build build -j
+          cmake --build build -j 2>&1 | tee build.log
+          test -f build/nosmoke
 
       - name: Upload binary
         uses: actions/upload-artifact@v4

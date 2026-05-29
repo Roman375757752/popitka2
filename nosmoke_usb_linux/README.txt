@@ -32,9 +32,12 @@ sudo apt install -y build-essential cmake pkg-config libsdl2-dev libsdl2-image-d
 
 СБОРКА ЗАНОВО (если бинарник не подошёл)
 ---------------------------------------
-  chmod +x build.sh
+  chmod +x build.sh run.sh
   ./build.sh
-  ./build/nosmoke
+  ./run.sh
+
+Если «Permission denied» на build.sh:
+  bash build.sh
 
 Важно: запускать из каталога, где лежат Graphics и Audio — иначе будет чёрный экран.
 

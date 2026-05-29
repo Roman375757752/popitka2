@@ -56,7 +56,7 @@ void SetUpFontIfNeeded(void)
 	}
 }
 
-void SetUpFont()
+void SetUpFont(void)
 {
 
 	fontColour = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);

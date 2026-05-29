@@ -13,7 +13,10 @@ if [[ -z "$BIN" ]]; then
 fi
 if ! strings "$BIN" | grep -q "BUILD_ID=20260529-gamefix"; then
   echo "ОШИБКА: $BIN — СТАРАЯ сборка (будет вылет на «Новая игра»)."
-  echo "Выполните: ./build.sh"
+  echo "Соберите заново:"
+  echo "  chmod +x build.sh run.sh"
+  echo "  ./build.sh"
+  echo "  (или: bash build.sh)"
   exit 1
 fi
 exec ./"$BIN"

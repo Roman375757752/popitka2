@@ -114,7 +114,7 @@ void UpdatePad(void)
 
 	if (g_controller)
 	{
-		SDL_GameControllerUpdate(g_controller);
+		SDL_GameControllerUpdate();
 		const Uint32 cur = read_controller_buttons(g_controller);
 		const Uint32 edge = cur & ~prev_gc_buttons;
 		prev_gc_buttons = cur;
